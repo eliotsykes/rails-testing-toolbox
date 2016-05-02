@@ -1,3 +1,4 @@
+# Sets default_url_options for URL generating model specs
 RSpec.configure do |config|
   config.around(:each) do |example|
     begin
