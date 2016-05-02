@@ -1,0 +1,1 @@
+VCR stores its cached responses in spec/support/http_cache/server
