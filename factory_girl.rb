@@ -4,7 +4,7 @@ RSpec.configure do |config|
   config.before(:suite) do
     begin
       DatabaseCleaner.start
-      FactoryGirl.lint
+      FactoryGirl.lint traits:true
     ensure
       DatabaseCleaner.clean
     end
