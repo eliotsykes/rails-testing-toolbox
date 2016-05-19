@@ -7,7 +7,7 @@ RSpec.configure do |config|
       # non-spec file paths under spec/ will not raise an error.
       File.file?(filename) &&
         !filename.match(/_spec\.rb\z/) &&
-        !filename.match(%r{\Aspec/(support|factories|mailers/previews)/}) &&
+        !filename.match(%r{\Aspec/(support|factories|mailers/previews|[a-z]+/shared_examples)/}) &&
         !filename.match(%r{\Aspec/(spec_helper\.rb|rails_helper\.rb|examples\.txt)\z})
     end
 
