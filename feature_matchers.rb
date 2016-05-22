@@ -16,6 +16,12 @@ module FeatureMatchers
   #     expect(page).to have_content 'Almost done! Check your email and click the confirmation link.'
   #   end
   # end
+
+  matcher :have_flash do |level, text|
+    match_unless_raises do |page|
+      expect(page).to have_css("[data-flash=#{level}]", text: text)
+    end
+  end
 end
 
 RSpec.configure do |config|
