@@ -1,5 +1,13 @@
 module CapybaraExtensions
-  
+  extend RSpec::Matchers::DSL
+
+  matcher :have_link_open_in_new_window do |locator, options={}|
+    match do |page|
+      link = page.find_link(locator, options)
+      link && link[:target] == '_blank'
+    end
+  end
+
   # Provide a select() method that will close the select dropdown
   # after selection automatically. This avoids the sporadic test
   # failures that sometimes occur when a feature spec performs
@@ -14,17 +22,17 @@ module CapybaraExtensions
   # The above steps aren't reliably reproducible as the dropdown does
   # often close fast enough after selection. It appears to be easier
   # to reproduce on slower environments (e.g. CI env).
-  # 
-  # This fix works by introducing a custom select method to prevent 
+  #
+  # This fix works by introducing a custom select method to prevent
   # Capybara automatically forwarding select() calls to page.select().
-  # 
-  # Allows us to customize behaviour whilst also calling 
+  #
+  # Allows us to customize behaviour whilst also calling
   # page.current_scope.select (defined in Capybara::Node::Actions#select)
   # which is responsible for doing the actual selection work.
   def select(value, options={})
     select_then_close(value, options)
   end
-  
+
   # Selects option from <select> drop down then blurs so drop down is
   # closed. Useful when a drop down obscures an element that needs to be
   # clicked.
@@ -33,7 +41,7 @@ module CapybaraExtensions
     expect(blur_active_element).to(eq(true), 'Blur & close select element failed')
     result
   end
-  
+
   private
 
   def blur_active_element
@@ -52,11 +60,4 @@ end
 
 RSpec.configure do |config|
   config.include CapybaraExtensions, type: :feature
-end
-
-RSpec::Matchers.define :have_link_open_in_new_window do |locator, options={}|
-  match do |page|
-    link = page.find_link(locator, options)
-    link && link[:target] == '_blank'
-  end
 end
