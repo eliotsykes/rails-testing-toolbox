@@ -17,13 +17,3 @@ module ExceptionFailureMessage
   end
 end
 RSpec::Matchers::DSL::Matcher.include ExceptionFailureMessage
-
-Dir[Rails.root.join("spec/matchers/**/*.rb")].each { |f| require f }
-
-RSpec.configure do |config|
-  config.include Matchers
-end
-
-# Write custom matcher classes in spec/matchers/ directory
-# Each matcher class will need to be in a module called
-# `Matchers` to work with the RSpec configuration specified.
