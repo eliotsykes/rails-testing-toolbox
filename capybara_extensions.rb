@@ -8,6 +8,17 @@ module CapybaraExtensions
     end
   end
 
+  def refresh
+    url = URI.parse(current_url)
+    if url.query.blank?
+      url.query = ""
+    else
+      url.query << "&"
+    end
+    url.query << "refreshEnforcer=#{rand}"
+    visit url.to_s
+  end
+
   # Provide a select() method that will close the select dropdown
   # after selection automatically. This avoids the sporadic test
   # failures that sometimes occur when a feature spec performs
