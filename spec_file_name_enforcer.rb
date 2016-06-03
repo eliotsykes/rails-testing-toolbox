@@ -2,7 +2,7 @@
 RSpec.configure do |config|
   config.before(:suite) do
 
-    files_without_spec_suffix = Dir.glob('spec/**/*').select do |filename|
+    files_without_spec_suffix = Dir.glob('spec/**/*.rb').select do |filename|
       # Customize regular expression patterns below as needed. Common
       # non-spec file paths under spec/ will not raise an error.
       File.file?(filename) &&
