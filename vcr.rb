@@ -26,12 +26,22 @@ VCR.configure do |config|
 
   config.allow_http_connections_when_no_cassette = false
 
-  # Replace sensitive data before recording cassette
+  # Protect sensitive data from being captured in cassette
+  config.filter_sensitive_data('<A_SECRET>') { ENV.fetch('A_SECRET') }
+  protected_authorization_headers = ['Bearer <A_SECRET>']
+
+  config.filter_sensitive_data('<FOO_USER>') { ENV.fetch('FOO_USER') }
+  config.filter_sensitive_data('<FOO_SECRET>') { ENV.fetch('FOO_SECRET') }
+  protected_uri_credentials = ['<FOO_USER>:<FOO_SECRET>']
+
+  # Flag unprotected sensitive data
   config.before_record do |http_interaction|
-    sensitive_request_headers = ['Authorization']
-    sensitive_request_headers.each do |header_key|
-      if http_interaction.request.headers.key?(header_key)
-        raise "Handle protecting #{header_key} request header in VCR"
+    authorization_header =  http_interaction.request.headers['Authorization']
+    if authorization_header
+      raise 'Unexpected number of Authorization headers' if authorization_header.size != 1
+
+      unless protected_authorization_headers.include?(authorization_header[0])
+        raise 'Found Authorization header unprotected by VCRs filter_sensitive_data'
       end
     end
 
@@ -42,22 +52,15 @@ VCR.configure do |config|
       end
     end
 
-    def replace_uri_credentials(http_interaction)
-      dummy_credentials_by_host_pattern = {
-        /example\.com/ => 'EXAMPLE_USER_FOR_TEST:EXAMPLE_SECRET_FOR_TEST',
-        /foo\.com/ => 'FOO_USER_FOR_TEST:FOO_SECRET_FOR_TEST'
-      }
+    flag_uri_credentials(http_interaction, protected_uri_credentials)
+  end
 
-      http_interaction.request.uri.sub!(%r{(?<=://).*:.*(?=@)}) do
-        host_and_path = $'
-        result = dummy_credentials_by_host_pattern.find do |(host_pattern, credentials)|
-          host_pattern === host_and_path
-        end
-        raise "Not yet able to handle dummy credentials for #{host_and_path}" if result.blank?
-        dummy_credentials = result.last
+  def flag_uri_credentials(http_interaction, protected_uri_credentials)
+    uri_credentials_pattern = %r{(?<=://)(?<credentials>.*:.*)(?=@)}
+    http_interaction.request.uri.match(uri_credentials_pattern) do |match_data|
+      if !match_data[:credentials].in?(protected_uri_credentials)
+        raise 'Unprotected credentials found, protect with VCR config'
       end
     end
-
-    replace_uri_credentials(http_interaction)
   end
 end
