@@ -5,10 +5,12 @@ VCR.configure do |config|
   # and prepend with RECORD set to true:
   # RECORD=true bin/rspec spec/features/user_upgrades_spec.rb
   record_mode = HttpRecord.on? ? :once : :none
+
   config.default_cassette_options = {
     decode_compressed_response: true,
     allow_unused_http_interactions: false,
     match_requests_on: [:method, :uri, :body],
+    update_content_length_header: true,
     record: record_mode
   }
 
