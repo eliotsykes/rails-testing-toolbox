@@ -3,7 +3,7 @@
 module CapybaraDriverResolver
 
   FIREFOX_DRIVERS   = [:selenium_billy, :selenium]
-  CHROME_DRIVERS    = [:selenium_chrome_billy]
+  CHROME_DRIVERS    = [:selenium_chrome_billy, :selenium_chrome_ssl]
   PHANTOMJS_DRIVERS = [:poltergeist_billy, :poltergeist]
 
   WITH_NATIVE_DATE_INPUT    = PHANTOMJS_DRIVERS + CHROME_DRIVERS
