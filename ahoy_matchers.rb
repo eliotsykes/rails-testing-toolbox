@@ -1,7 +1,7 @@
 require_relative 'matcher_extensions'
 
 # Reminder: Relax or disable Ahoy's throttling in your test environment
-# to avoid events to be rejected. See Ahoy README section on throttling
+# to avoid events being rejected. See Ahoy README section on throttling
 # and/or Ahoy.throttle_limit/period settings.
 RSpec::Matchers.define :have_tracked_event do |name, user: nil, **props|
 
