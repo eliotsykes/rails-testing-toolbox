@@ -32,6 +32,8 @@ RSpec.configure do |config|
     EmberBuilder.build_once
     # Increase default wait time to account for Ember app boot time:
     using_wait_time 20.seconds do
+      # Use one of BrowserCache or AssetPipelineCache
+      # AssetPipelineCache.prime
       BrowserCache.prime
     end
   end
