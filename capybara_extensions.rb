@@ -74,5 +74,7 @@ RSpec.configure do |config|
 
   # Make have_* matchers available to request specs e.g.:
   # expect(response.body).to have_title 'My Page Title'
-  config.include Capybara::RSpecMatchers, type: :request
+  # and model specs (sometimes rely on mail matchers that use
+  # have_css etc. in model specs).
+  config.include Capybara::RSpecMatchers, type: /request|model/
 end
