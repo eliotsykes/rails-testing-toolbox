@@ -49,11 +49,17 @@ module CapybaraExtensions
   # clicked.
   def select_then_close(value, options = {})
     result = page.select(value, options)
-    expect(blur_active_element).to(eq(true), 'Blur & close select element failed')
+    if jsable_driver?
+      expect(blur_active_element).to(eq(true), 'Blur & close select element failed')
+    end
     result
   end
 
   private
+
+  def blur_field(locator)
+    find_field(locator).send_keys(:tab)
+  end
 
   def blur_active_element
     return unless jsable_driver?
