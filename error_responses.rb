@@ -17,4 +17,8 @@ end
 
 RSpec.configure do |config|
   config.include ErrorResponses
+
+  config.around(realistic_error_responses: true) do |example|
+    respond_without_detailed_exceptions(&example)
+  end
 end
