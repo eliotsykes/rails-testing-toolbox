@@ -10,8 +10,9 @@ module StripeHelper
     CARD_NUMBERS[type]
   end
 
-  def fill_in_with_force(locator, options)
-    page.execute_script "$('#{locator}').val('#{options[:with]}');"
+  def fill_in_with_force(locator, with:)
+    field_id = find_field(locator)[:id]
+    page.execute_script "document.getElementById('#{field_id}').value = '#{with}';"
   end
 
   alias_method :fill_in_stripe_field, :fill_in_with_force
