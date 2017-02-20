@@ -1,30 +1,16 @@
 RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
 
-  skip_factory_girl_lint_for_speed = config.files_to_run.one?
-
-  enable_profiling = config.files_to_run.size > 1
-  factory_girl_profile = {} if enable_profiling
+  config.add_setting :skip_factory_lint, default: false
+  config.skip_factory_lint = config.files_to_run.one?
 
   config.before(:suite) do
     # Reload FactoryGirl to avoid ActiveRecord::AssociationTypeMismatch errors with Spring
     # https://github.com/thoughtbot/factory_girl/blob/d42595f4696a986d626a6b84e2592e85c5bb4c4f/GETTING_STARTED.md#rails-preloaders-and-rspec
     FactoryGirl.reload
 
-    if enable_profiling
-      ActiveSupport::Notifications.subscribe("factory_girl.run_factory") do |name, start, finish, id, payload|
-        duration_in_secs = finish - start
-        factory_name = payload[:name]
-        strategy_name = payload[:strategy]
-        factory_girl_profile[factory_name] ||= {}
-        factory_girl_profile[factory_name][strategy_name] ||= { duration_in_secs: 0.0, count: 0 }
-        factory_girl_profile[factory_name][strategy_name][:duration_in_secs] += duration_in_secs
-        factory_girl_profile[factory_name][strategy_name][:count] += 1
-      end
-    end
-
     begin
-      if skip_factory_girl_lint_for_speed
+      if config.skip_factory_lint?
         puts "Skipping FactoryGirl.lint for speed"
       else
         DatabaseCleaner.start
@@ -46,21 +32,6 @@ RSpec.configure do |config|
       end
     ensure
       DatabaseCleaner.clean
-    end
-  end
-
-  if enable_profiling
-    config.after(:suite) do
-      puts "\nFactoryGirl Profiles"
-      total_in_secs = 0.0
-      factory_girl_profile.each do |factory_name, factory_profile|
-        puts "\n  #{factory_name}"
-        factory_profile.each do |strategy, profile|
-          puts "    #{strategy} called #{profile[:count]} times took #{profile[:duration_in_secs].round(2)} seconds total"
-          total_in_secs += profile[:duration_in_secs]
-        end
-      end
-      puts "\n Total FactoryGirl time #{total_in_secs.round(2)} seconds"
     end
   end
 
