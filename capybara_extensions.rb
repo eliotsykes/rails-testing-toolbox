@@ -8,6 +8,35 @@ module CapybaraExtensions
     end
   end
 
+  # Matcher checks if the original page has been unloaded and replaced with a new page
+  # expect { click_link '' }.to unload_page
+  # expect { click_button 'Submit' }.not_to unload_page
+  #
+  # Also available as exit_page, replace_page:
+  #
+  # expect { click_link '' }.to exit_page
+  # expect { click_button 'Submit' }.not_to replace_page
+  matcher :unload_page do
+    supports_block_expectations
+
+    match do |interaction|
+      page_id = SecureRandom.hex
+
+      page.execute_script <<-JS.strip_heredoc
+        window.addEventListener("beforeunload", function(event) {
+          window.__TEST_PAGE_ID = undefined;
+        });
+        window.__TEST_PAGE_ID = "#{page_id}";
+      JS
+
+      interaction.call
+
+      page_unloaded = evaluate_script "window.__TEST_PAGE_ID != '#{page_id}'"
+    end
+  end
+  RSpec::Matchers.alias_matcher :exit_page, :unload_page
+  RSpec::Matchers.alias_matcher :replace_page, :unload_page
+
   def refresh
     url = URI.parse(current_url)
     if url.query.blank?
