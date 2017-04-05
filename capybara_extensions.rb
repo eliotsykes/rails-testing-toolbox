@@ -9,33 +9,44 @@ module CapybaraExtensions
   end
 
   # Matcher checks if the original page has been unloaded and replaced with a new page
-  # expect { click_link '' }.to unload_page
-  # expect { click_button 'Submit' }.not_to unload_page
+  # expect { click_link '' }.to replace_page
+  # expect { click_button 'Submit' }.not_to replace_page
   #
-  # Also available as exit_page, replace_page:
+  # Also available as exit_page:
   #
   # expect { click_link '' }.to exit_page
-  # expect { click_button 'Submit' }.not_to replace_page
-  matcher :unload_page do
+  # expect { click_button 'Submit' }.not_to exit_page
+  matcher :replace_page do
     supports_block_expectations
 
     match do |interaction|
-      page_id = SecureRandom.hex
+      # Generate a unique page id:
+      page_id = "test-page-id-#{SecureRandom.hex}"
 
-      page.execute_script <<-JS.strip_heredoc
+      execute_script <<-JS.strip_heredoc
         window.addEventListener("beforeunload", function(event) {
-          window.__TEST_PAGE_ID = undefined;
+          // Precaution (may not be necessary) to ensure that during unload
+          // the state is not set to undefined. Only want undefined state
+          // to be present on the new page.
+          window.__test_page_load_state = "before-unloading";
         });
-        window.__TEST_PAGE_ID = "#{page_id}";
+
+        // Store the load state and the page id as part of
+        // the current page:
+        window.__test_page_load_state = "loaded";
+        document.documentElement.classList.add("#{page_id}");
       JS
 
+      # Execute the block passed to `expect`:
       interaction.call
 
-      page_unloaded = evaluate_script "window.__TEST_PAGE_ID != '#{page_id}'"
+      # Return true if the original page has been replaced:
+      page_replaced = evaluate_script <<-JS.strip_heredoc
+        window.__test_page_load_state === undefined && !document.documentElement.classList.contains("#{page_id}")
+      JS
     end
   end
-  RSpec::Matchers.alias_matcher :exit_page, :unload_page
-  RSpec::Matchers.alias_matcher :replace_page, :unload_page
+  RSpec::Matchers.alias_matcher :exit_page, :replace_page
 
   def refresh
     url = URI.parse(current_url)
