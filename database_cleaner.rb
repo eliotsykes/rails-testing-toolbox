@@ -37,6 +37,13 @@ RSpec.configure do |config|
     end
   end
 
+  # When testing transactional behaviour, include :transaction_test in example metadata
+  # to enable typical transaction behaviour, by using truncation db cleanup instead of
+  # transactional db cleanup (which can interfere with the transactions being tested).
+  config.before(:each, transaction_test: true) do
+    DatabaseCleaner.strategy = :truncation
+  end
+
   config.before(:each) do
     DatabaseCleaner.start
   end
