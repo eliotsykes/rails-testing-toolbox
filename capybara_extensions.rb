@@ -13,13 +13,15 @@ module CapybaraExtensions
   # expect { click_button 'Submit' }.not_to replace_page
   #
   # Also available as exit_page:
-  #
   # expect { click_link '' }.to exit_page
   # expect { click_button 'Submit' }.not_to exit_page
-  matcher :replace_page do
+  #
+  # To alter the wait time from Capybara.default_max_wait_time:
+  # expect { click_link 'this takes ages' }.to replace_page(wait: 20.seconds)
+  matcher :replace_page do |wait: Capybara.default_max_wait_time|
     supports_block_expectations
 
-    match_unless_raises do |interaction, wait: Capybara.default_max_wait_time|
+    match_unless_raises do |interaction|
       # Generate a unique page id:
       page_id = "test-page-id-#{SecureRandom.hex}"
 
