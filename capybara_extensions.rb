@@ -19,7 +19,7 @@ module CapybaraExtensions
   matcher :replace_page do
     supports_block_expectations
 
-    match do |interaction|
+    match_unless_raises do |interaction, wait: Capybara.default_max_wait_time|
       # Generate a unique page id:
       page_id = "test-page-id-#{SecureRandom.hex}"
 
@@ -30,7 +30,6 @@ module CapybaraExtensions
           // to be present on the new page.
           window.__test_page_load_state = "before-unloading";
         });
-
         // Store the load state and the page id as part of
         // the current page:
         window.__test_page_load_state = "loaded";
@@ -40,10 +39,12 @@ module CapybaraExtensions
       # Execute the block passed to `expect`:
       interaction.call
 
-      # Return true if the original page has been replaced:
-      page_replaced = evaluate_script <<-JS.strip_heredoc
+      is_page_replaced_snippet = <<-JS.strip_heredoc
         window.__test_page_load_state === undefined && !document.documentElement.classList.contains("#{page_id}")
       JS
+
+      # Wait as it may take some time for the page to be replaced.
+      RSpec::Wait.wait(wait).for { evaluate_script(is_page_replaced_snippet) }.to eq(true)
     end
   end
   RSpec::Matchers.alias_matcher :exit_page, :replace_page
