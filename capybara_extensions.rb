@@ -114,8 +114,13 @@ module CapybaraExtensions
   end
 
   def jsable_driver?
+    CapybaraExtensions.jsable_driver?
+  end
+
+  def self.jsable_driver?
     Capybara.current_driver != :rack_test
   end
+
 end
 
 RSpec.configure do |config|
