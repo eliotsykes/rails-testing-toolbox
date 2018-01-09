@@ -1,16 +1,20 @@
+# Annotate specs with metadata:
+# - 'run_jobs: true' to run jobs inline immediately
+# - 'run_jobs: false' to store jobs in delayed_jobs table, and *not* run the jobs
 module DelayedJobHelper
-  def perform_jobs_without_delay
-    delay_jobs = Delayed::Worker.delay_jobs
-    Delayed::Worker.delay_jobs = false
+  def run_jobs(perform)
+    original_delay_jobs = Delayed::Worker.delay_jobs
+    Delayed::Worker.delay_jobs = !perform
     yield
   ensure
-    Delayed::Worker.delay_jobs = delay_jobs
+    Delayed::Worker.delay_jobs = original_delay_jobs
   end
 end
 
 RSpec.configure do |config|
-  config.around(:each, type: :feature) do |example|
-    perform_jobs_without_delay do
+  config.around(:each) do |example|
+    perform = example.metadata.fetch(:run_jobs, true)
+    run_jobs(perform) do
       example.run
     end
   end
