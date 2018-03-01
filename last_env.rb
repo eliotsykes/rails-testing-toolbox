@@ -13,6 +13,10 @@ module LastEnv
     @current
   end
 
+  def self.reset
+    @current = nil
+  end
+
   def last_env
     LastEnv.current
   end
@@ -37,4 +41,5 @@ end
 
 RSpec.configure do |config|
   config.include LastEnv, type: :feature
+  config.after(:each, type: :feature) { LastEnv.reset }
 end
