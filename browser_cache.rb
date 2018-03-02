@@ -1,3 +1,5 @@
+# Consider simplifying BrowserCache by removing its singleton behaviour
+# and instead use RSpec's when_first_matching_example_defined.
 class BrowserCache
   include Singleton
 

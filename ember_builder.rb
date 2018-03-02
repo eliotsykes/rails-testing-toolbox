@@ -38,4 +38,11 @@ RSpec.configure do |config|
     end
   end
 
+  # Consider simplifying EmberBuilder and BrowserCache by removing their singleton behaviour
+  # and instead use RSpec's when_first_matching_example_defined, e.g.:
+  # config.when_first_matching_example_defined(type: :feature) do
+  #   EmberBuilder.build
+  #   using_wait_time(20.seconds) { BrowserCache.prime }
+  # end
+
 end

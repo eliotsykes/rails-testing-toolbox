@@ -38,7 +38,14 @@ class AssetPipelineCache
 end
 
 RSpec.configure do |config|
+
   config.before(:each, type: :feature) do
     AssetPipelineCache.prime
   end
+
+  # Consider simplifying AssetPipelineCache by removing its singleton behaviour
+  # and instead use RSpec's when_first_matching_example_defined, e.g.:
+  # config.when_first_matching_example_defined(type: :feature) do
+  #   AssetPipelineCache.prime
+  # end
 end
