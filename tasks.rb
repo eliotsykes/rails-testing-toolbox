@@ -18,6 +18,11 @@ module TaskExampleGroup
     let(:task_name) { self.class.top_level_description.sub(/\Arake /, '') }
     let(:tasks) { Rake::Task }
     subject(:task) { tasks[task_name] }
+    
+    after(:each) do
+      task.all_prerequisite_tasks.each { |prerequisite| tasks[prerequisite].reenable }
+      task.reenable
+    end
   end
 end
 
