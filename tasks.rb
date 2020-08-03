@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # For testing rake tasks
 require 'rake'
 
@@ -15,11 +17,12 @@ module TaskExampleGroup
   extend ActiveSupport::Concern
 
   included do
+    subject(:task) { tasks[task_name] }
+
     let(:task_name) { self.class.top_level_description.sub(/\Arake /, '') }
     let(:tasks) { Rake::Task }
-    subject(:task) { tasks[task_name] }
     
-    after(:each) do
+    after do
       task.all_prerequisite_tasks.each { |prerequisite| tasks[prerequisite].reenable }
       task.reenable
     end
@@ -28,7 +31,7 @@ end
 
 
 RSpec.configure do |config|
-  config.define_derived_metadata(:file_path => %r{/spec/tasks/}) do |metadata|
+  config.define_derived_metadata(file_path: %r{/spec/tasks/}) do |metadata|
     metadata[:type] = :task
   end
 
